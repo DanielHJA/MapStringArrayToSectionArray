@@ -28,7 +28,7 @@ extension Array where Element : Equatable {
                     return (lhs as! [String]).first! > (rhs as! [String]).first!
                 }
             })
-        }te
+        }
         return result
     }
 }
