@@ -13,7 +13,7 @@ enum SortType {
 }
 
 extension Array where Element : Equatable {
-    func mapArrayToSectionArray(sorted: Bool, sortBy: SortType) -> [[Element]] {
+    func mapArrayToSectionArray(sorted: Bool, sortBy: SortType) -> [[String]] {
         var dict = [String: [Element]]()
         _ = self.map { dict[String(describing: ($0 as! String).first)] = []}
         _ = self.map { dict[String(describing: ($0 as! String).first)]?.append($0) }
@@ -21,15 +21,23 @@ extension Array where Element : Equatable {
         let result = dict.map { $0.value }
         
         if sorted {
-            return result.sorted(by: { (lhs, rhs) -> Bool in
-                if sortBy == .ascending {
-                    return (lhs as! [String]).first! < (rhs as! [String]).first!
-                } else {
-                    return (lhs as! [String]).first! > (rhs as! [String]).first!
-                }
-            })
+            switch sortBy {
+            case .ascending:
+                let sortedSections = (result as! [[String]]).map { $0.sorted() }
+                return sortedSections.sorted(by: { (lhs, rhs) -> Bool in
+                    return lhs.first! < rhs.first!
+                })
+            case .descending:
+                let sortedSections = (result as! [[String]]).map { ($0.sorted()) }
+                var reversed = [[String]]()
+                for section in sortedSections { reversed.append(section.reversed()) }
+                
+                return reversed.sorted(by: { (lhs, rhs) -> Bool in
+                    return lhs.first! > rhs.first!
+                })
+            }
         }
-        return result
+        return result as! [[String]]
     }
 }
 
@@ -37,7 +45,7 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     
-    var arr: [String] = ["Ba", "Bb","Aa","Ak","Aw","Du","Cl","Ee","Ff","Gg","Hh","Jj"]
+    var arr: [String] = ["Bb", "Ba", "Bc", "Aa","Ak","Aw","Du","Cl","Ee","Ff","Gg","Hh","Jj"]
     var items: [[String]] = []
     
     override func viewDidLoad() {
@@ -45,7 +53,7 @@ class ViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         
-        items = arr.mapArrayToSectionArray(sorted: true, sortBy: .ascending)
+        items = arr.mapArrayToSectionArray(sorted: true, sortBy: .descending)
         
         tableView.reloadData()
     }
